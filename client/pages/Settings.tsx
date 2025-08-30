@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,12 +27,28 @@ import {
   Save,
 } from "lucide-react";
 
+type SettingsData = {
+  audioEnabled: boolean;
+  volume: number[];
+  speechRate: number[];
+  pitch: number[];
+  selectedVoiceId: string;
+  autoSpeech: boolean;
+  darkMode: boolean;
+  confidence: number[];
+  processingMode: string;
+};
+
+const SETTINGS_KEY = "liphera-settings";
+
 export default function SettingsPage() {
+  const [tab, setTab] = useState("audio");
+  useIntersectionObserver();
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [volume, setVolume] = useState([75]);
   const [speechRate, setSpeechRate] = useState([1.0]);
   const [pitch, setPitch] = useState([1.0]);
-  const [voiceGender, setVoiceGender] = useState("female");
+  const [selectedVoiceId, setSelectedVoiceId] = useState("female1");
   const [autoSpeech, setAutoSpeech] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [confidence, setConfidence] = useState([80]);
@@ -64,13 +82,86 @@ export default function SettingsPage() {
     },
   ];
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        const data: SettingsData = JSON.parse(raw);
+        setAudioEnabled(data.audioEnabled);
+        setVolume(data.volume);
+        setSpeechRate(data.speechRate);
+        setPitch(data.pitch);
+        setSelectedVoiceId(data.selectedVoiceId);
+        setAutoSpeech(data.autoSpeech);
+        setDarkMode(data.darkMode);
+        setConfidence(data.confidence);
+        setProcessingMode(data.processingMode);
+      }
+    } catch (e) {
+      console.error("Failed to load settings", e);
+    }
+  }, []);
+
+  const getSettings = (): SettingsData => ({
+    audioEnabled,
+    volume,
+    speechRate,
+    pitch,
+    selectedVoiceId,
+    autoSpeech,
+    darkMode,
+    confidence,
+    processingMode,
+  });
+
+  const resetDefaults = () => {
+    setAudioEnabled(true);
+    setVolume([75]);
+    setSpeechRate([1.0]);
+    setPitch([1.0]);
+    setSelectedVoiceId("female1");
+    setAutoSpeech(true);
+    setDarkMode(false);
+    setConfidence([80]);
+    setProcessingMode("balanced");
+  };
+
+  const handleSave = () => {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(getSettings()));
+    } catch (e) {
+      console.error("Failed to save settings", e);
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(getSettings(), null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "liphera-settings.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleClearCache = () => {
+    localStorage.removeItem(SETTINGS_KEY);
+    resetDefaults();
+  };
+
+  const handleResetAll = () => {
+    resetDefaults();
+  };
+
   return (
     <div className="min-h-screen pt-8 pb-24">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 fade-in-section">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground transition-all duration-300 hover:scale-110">
               <SettingsIcon className="h-6 w-6 text-background" />
             </div>
             <div>
@@ -82,7 +173,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="audio" className="space-y-6">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="audio" className="flex items-center space-x-2">
               <Volume2 className="h-4 w-4" />
@@ -113,7 +204,7 @@ export default function SettingsPage() {
 
           {/* Audio Settings */}
           <TabsContent value="audio" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Speech Synthesis</CardTitle>
                 <CardDescription>
@@ -186,7 +277,13 @@ export default function SettingsPage() {
                     {voiceOptions.map((voice) => (
                       <Card
                         key={voice.id}
-                        className="cursor-pointer hover:border-liphera-blue/50 transition-colors"
+                        className={cn(
+                          "border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-border scale-in-section group",
+                          selectedVoiceId === voice.id
+                            ? "border-foreground bg-muted/50"
+                            : "",
+                        )}
+                        onClick={() => setSelectedVoiceId(voice.id)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
@@ -196,7 +293,11 @@ export default function SettingsPage() {
                                 {voice.accent} Accent
                               </p>
                             </div>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="transition-all duration-300 hover:scale-105"
+                            >
                               <Volume2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -226,7 +327,7 @@ export default function SettingsPage() {
 
           {/* Processing Settings */}
           <TabsContent value="processing" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>AI Processing</CardTitle>
                 <CardDescription>
@@ -243,11 +344,11 @@ export default function SettingsPage() {
                     {processingModes.map((mode) => (
                       <Card
                         key={mode.id}
-                        className={`cursor-pointer transition-colors ${
+                        className={`border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${
                           processingMode === mode.id
                             ? "border-foreground bg-muted/50"
                             : "hover:border-border"
-                        }`}
+                        } scale-in-section group`}
                         onClick={() => setProcessingMode(mode.id)}
                       >
                         <CardContent className="p-4 text-center">
@@ -299,7 +400,11 @@ export default function SettingsPage() {
                         <span className="ml-2 font-medium">2 days ago</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3 transition-all duration-300 hover:scale-105"
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check for Updates
                     </Button>
@@ -311,7 +416,7 @@ export default function SettingsPage() {
 
           {/* Display Settings */}
           <TabsContent value="display" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Display Preferences</CardTitle>
                 <CardDescription>
@@ -357,7 +462,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Card className="bg-muted/50 border-border">
+                <Card className="bg-muted/50 border-border fade-in-section transition-all duration-300 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <Palette className="h-4 w-4 text-foreground" />
@@ -375,7 +480,7 @@ export default function SettingsPage() {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Privacy & Security</CardTitle>
                 <CardDescription>
@@ -408,17 +513,26 @@ export default function SettingsPage() {
                 <div>
                   <Label className="text-base">Data Management</Label>
                   <div className="mt-3 space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button
+                      onClick={handleExport}
+                      variant="outline"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export Settings
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button
+                      onClick={handleClearCache}
+                      variant="outline"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Clear Cache
                     </Button>
                     <Button
+                      onClick={handleResetAll}
                       variant="destructive"
-                      className="w-full justify-start"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Reset All Settings
@@ -426,7 +540,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800 fade-in-section transition-all duration-300 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <Shield className="h-4 w-4 text-green-600" />
@@ -447,8 +561,17 @@ export default function SettingsPage() {
 
         {/* Save Settings */}
         <div className="flex justify-end space-x-4 mt-8">
-          <Button variant="outline">Reset to Defaults</Button>
-          <Button>
+          <Button
+            variant="outline"
+            onClick={handleResetAll}
+            className="transition-all duration-300 hover:scale-105"
+          >
+            Reset to Defaults
+          </Button>
+          <Button
+            onClick={handleSave}
+            className="transition-all duration-300 hover:scale-105"
+          >
             <Save className="h-4 w-4 mr-2" />
             Save Settings
           </Button>
