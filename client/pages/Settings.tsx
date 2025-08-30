@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,13 +28,27 @@ import {
   Save,
 } from "lucide-react";
 
+type SettingsData = {
+  audioEnabled: boolean;
+  volume: number[];
+  speechRate: number[];
+  pitch: number[];
+  selectedVoiceId: string;
+  autoSpeech: boolean;
+  darkMode: boolean;
+  confidence: number[];
+  processingMode: string;
+};
+
+const SETTINGS_KEY = "liphera-settings";
+
 export default function SettingsPage() {
   useIntersectionObserver();
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [volume, setVolume] = useState([75]);
   const [speechRate, setSpeechRate] = useState([1.0]);
   const [pitch, setPitch] = useState([1.0]);
-  const [voiceGender, setVoiceGender] = useState("female");
+  const [selectedVoiceId, setSelectedVoiceId] = useState("female1");
   const [autoSpeech, setAutoSpeech] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [confidence, setConfidence] = useState([80]);
@@ -65,6 +81,77 @@ export default function SettingsPage() {
       icon: "🎯",
     },
   ];
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        const data: SettingsData = JSON.parse(raw);
+        setAudioEnabled(data.audioEnabled);
+        setVolume(data.volume);
+        setSpeechRate(data.speechRate);
+        setPitch(data.pitch);
+        setSelectedVoiceId(data.selectedVoiceId);
+        setAutoSpeech(data.autoSpeech);
+        setDarkMode(data.darkMode);
+        setConfidence(data.confidence);
+        setProcessingMode(data.processingMode);
+      }
+    } catch (e) {
+      console.error("Failed to load settings", e);
+    }
+  }, []);
+
+  const getSettings = (): SettingsData => ({
+    audioEnabled,
+    volume,
+    speechRate,
+    pitch,
+    selectedVoiceId,
+    autoSpeech,
+    darkMode,
+    confidence,
+    processingMode,
+  });
+
+  const resetDefaults = () => {
+    setAudioEnabled(true);
+    setVolume([75]);
+    setSpeechRate([1.0]);
+    setPitch([1.0]);
+    setSelectedVoiceId("female1");
+    setAutoSpeech(true);
+    setDarkMode(false);
+    setConfidence([80]);
+    setProcessingMode("balanced");
+  };
+
+  const handleSave = () => {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(getSettings()));
+    } catch (e) {
+      console.error("Failed to save settings", e);
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(getSettings(), null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "liphera-settings.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleClearCache = () => {
+    localStorage.removeItem(SETTINGS_KEY);
+    resetDefaults();
+  };
+
+  const handleResetAll = () => {
+    resetDefaults();
+  };
 
   return (
     <div className="min-h-screen pt-8 pb-24">
@@ -188,7 +275,11 @@ export default function SettingsPage() {
                     {voiceOptions.map((voice) => (
                       <Card
                         key={voice.id}
-                        className="border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-border scale-in-section group"
+                        className={cn(
+                          "border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-border scale-in-section group",
+                          selectedVoiceId === voice.id ? "border-foreground bg-muted/50" : "",
+                        )}
+                        onClick={() => setSelectedVoiceId(voice.id)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
@@ -410,15 +501,16 @@ export default function SettingsPage() {
                 <div>
                   <Label className="text-base">Data Management</Label>
                   <div className="mt-3 space-y-3">
-                    <Button variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
+                    <Button onClick={handleExport} variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
                       <Download className="h-4 w-4 mr-2" />
                       Export Settings
                     </Button>
-                    <Button variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
+                    <Button onClick={handleClearCache} variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Clear Cache
                     </Button>
                     <Button
+                      onClick={handleResetAll}
                       variant="destructive"
                       className="w-full justify-start transition-all duration-300 hover:scale-105"
                     >
@@ -449,8 +541,8 @@ export default function SettingsPage() {
 
         {/* Save Settings */}
         <div className="flex justify-end space-x-4 mt-8">
-          <Button variant="outline" className="transition-all duration-300 hover:scale-105">Reset to Defaults</Button>
-          <Button className="transition-all duration-300 hover:scale-105">
+          <Button variant="outline" onClick={handleResetAll} className="transition-all duration-300 hover:scale-105">Reset to Defaults</Button>
+          <Button onClick={handleSave} className="transition-all duration-300 hover:scale-105">
             <Save className="h-4 w-4 mr-2" />
             Save Settings
           </Button>
