@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { useState, useEffect } from "react";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
