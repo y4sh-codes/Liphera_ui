@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 export default function Index() {
+  const navigate = useNavigate();
   useIntersectionObserver();
 
   const features = [
@@ -96,25 +97,21 @@ export default function Index() {
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row animate-slide-up">
               <Button
-                asChild
+                onClick={() => navigate("/demo")}
                 size="lg"
                 className="transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
-                <Link to="/demo">
-                  <Play className="mr-2 h-4 w-4" />
-                  Try Live Demo
-                </Link>
+                <Play className="mr-2 h-4 w-4" />
+                Try Live Demo
               </Button>
               <Button
-                asChild
+                onClick={() => navigate("/languages")}
                 variant="outline"
                 size="lg"
                 className="transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
-                <Link to="/languages">
-                  <Globe className="mr-2 h-4 w-4" />
-                  Explore Languages
-                </Link>
+                <Globe className="mr-2 h-4 w-4" />
+                Explore Languages
               </Button>
             </div>
           </div>
@@ -288,15 +285,13 @@ export default function Index() {
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
-                asChild
+                onClick={() => navigate("/demo")}
                 size="lg"
                 variant="secondary"
                 className="transition-all duration-300 hover:scale-105 hover:shadow-lg group"
               >
-                <Link to="/demo">
-                  Start Demo
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
+                Start Demo
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
             </div>
           </div>
