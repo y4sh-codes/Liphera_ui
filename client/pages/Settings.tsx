@@ -42,6 +42,7 @@ type SettingsData = {
 const SETTINGS_KEY = "liphera-settings";
 
 export default function SettingsPage() {
+  const [tab, setTab] = useState("audio");
   useIntersectionObserver();
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [volume, setVolume] = useState([75]);
@@ -170,7 +171,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="audio" className="space-y-6">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="audio" className="flex items-center space-x-2">
               <Volume2 className="h-4 w-4" />
