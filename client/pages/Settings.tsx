@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
+  useIntersectionObserver();
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [volume, setVolume] = useState([75]);
   const [speechRate, setSpeechRate] = useState([1.0]);
@@ -68,9 +70,9 @@ export default function SettingsPage() {
     <div className="min-h-screen pt-8 pb-24">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 fade-in-section">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground transition-all duration-300 hover:scale-110">
               <SettingsIcon className="h-6 w-6 text-background" />
             </div>
             <div>
@@ -113,7 +115,7 @@ export default function SettingsPage() {
 
           {/* Audio Settings */}
           <TabsContent value="audio" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Speech Synthesis</CardTitle>
                 <CardDescription>
@@ -186,7 +188,7 @@ export default function SettingsPage() {
                     {voiceOptions.map((voice) => (
                       <Card
                         key={voice.id}
-                        className="cursor-pointer hover:border-liphera-blue/50 transition-colors"
+                        className="border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-border scale-in-section group"
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
@@ -196,7 +198,7 @@ export default function SettingsPage() {
                                 {voice.accent} Accent
                               </p>
                             </div>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" className="transition-all duration-300 hover:scale-105">
                               <Volume2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -226,7 +228,7 @@ export default function SettingsPage() {
 
           {/* Processing Settings */}
           <TabsContent value="processing" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>AI Processing</CardTitle>
                 <CardDescription>
@@ -243,11 +245,11 @@ export default function SettingsPage() {
                     {processingModes.map((mode) => (
                       <Card
                         key={mode.id}
-                        className={`cursor-pointer transition-colors ${
+                        className={`border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${
                           processingMode === mode.id
                             ? "border-foreground bg-muted/50"
                             : "hover:border-border"
-                        }`}
+                        } scale-in-section group`}
                         onClick={() => setProcessingMode(mode.id)}
                       >
                         <CardContent className="p-4 text-center">
@@ -299,7 +301,7 @@ export default function SettingsPage() {
                         <span className="ml-2 font-medium">2 days ago</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">
+                    <Button variant="outline" size="sm" className="w-full mt-3 transition-all duration-300 hover:scale-105">
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check for Updates
                     </Button>
@@ -311,7 +313,7 @@ export default function SettingsPage() {
 
           {/* Display Settings */}
           <TabsContent value="display" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Display Preferences</CardTitle>
                 <CardDescription>
@@ -357,7 +359,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Card className="bg-muted/50 border-border">
+                <Card className="bg-muted/50 border-border fade-in-section transition-all duration-300 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <Palette className="h-4 w-4 text-foreground" />
@@ -375,7 +377,7 @@ export default function SettingsPage() {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy" className="space-y-6">
-            <Card>
+            <Card className="scale-in-section transition-all duration-300 hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Privacy & Security</CardTitle>
                 <CardDescription>
@@ -408,17 +410,17 @@ export default function SettingsPage() {
                 <div>
                   <Label className="text-base">Data Management</Label>
                   <div className="mt-3 space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
                       <Download className="h-4 w-4 mr-2" />
                       Export Settings
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Clear Cache
                     </Button>
                     <Button
                       variant="destructive"
-                      className="w-full justify-start"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Reset All Settings
@@ -426,7 +428,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800 fade-in-section transition-all duration-300 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <Shield className="h-4 w-4 text-green-600" />
@@ -447,8 +449,8 @@ export default function SettingsPage() {
 
         {/* Save Settings */}
         <div className="flex justify-end space-x-4 mt-8">
-          <Button variant="outline">Reset to Defaults</Button>
-          <Button>
+          <Button variant="outline" className="transition-all duration-300 hover:scale-105">Reset to Defaults</Button>
+          <Button className="transition-all duration-300 hover:scale-105">
             <Save className="h-4 w-4 mr-2" />
             Save Settings
           </Button>
