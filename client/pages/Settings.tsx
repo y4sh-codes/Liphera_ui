@@ -135,7 +135,9 @@ export default function SettingsPage() {
   };
 
   const handleExport = () => {
-    const blob = new Blob([JSON.stringify(getSettings(), null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(getSettings(), null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -277,7 +279,9 @@ export default function SettingsPage() {
                         key={voice.id}
                         className={cn(
                           "border-muted cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-border scale-in-section group",
-                          selectedVoiceId === voice.id ? "border-foreground bg-muted/50" : "",
+                          selectedVoiceId === voice.id
+                            ? "border-foreground bg-muted/50"
+                            : "",
                         )}
                         onClick={() => setSelectedVoiceId(voice.id)}
                       >
@@ -289,7 +293,11 @@ export default function SettingsPage() {
                                 {voice.accent} Accent
                               </p>
                             </div>
-                            <Button size="sm" variant="outline" className="transition-all duration-300 hover:scale-105">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="transition-all duration-300 hover:scale-105"
+                            >
                               <Volume2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -392,7 +400,11 @@ export default function SettingsPage() {
                         <span className="ml-2 font-medium">2 days ago</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3 transition-all duration-300 hover:scale-105">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3 transition-all duration-300 hover:scale-105"
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check for Updates
                     </Button>
@@ -501,11 +513,19 @@ export default function SettingsPage() {
                 <div>
                   <Label className="text-base">Data Management</Label>
                   <div className="mt-3 space-y-3">
-                    <Button onClick={handleExport} variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
+                    <Button
+                      onClick={handleExport}
+                      variant="outline"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export Settings
                     </Button>
-                    <Button onClick={handleClearCache} variant="outline" className="w-full justify-start transition-all duration-300 hover:scale-105">
+                    <Button
+                      onClick={handleClearCache}
+                      variant="outline"
+                      className="w-full justify-start transition-all duration-300 hover:scale-105"
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Clear Cache
                     </Button>
@@ -541,8 +561,17 @@ export default function SettingsPage() {
 
         {/* Save Settings */}
         <div className="flex justify-end space-x-4 mt-8">
-          <Button variant="outline" onClick={handleResetAll} className="transition-all duration-300 hover:scale-105">Reset to Defaults</Button>
-          <Button onClick={handleSave} className="transition-all duration-300 hover:scale-105">
+          <Button
+            variant="outline"
+            onClick={handleResetAll}
+            className="transition-all duration-300 hover:scale-105"
+          >
+            Reset to Defaults
+          </Button>
+          <Button
+            onClick={handleSave}
+            className="transition-all duration-300 hover:scale-105"
+          >
             <Save className="h-4 w-4 mr-2" />
             Save Settings
           </Button>
